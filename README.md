@@ -128,7 +128,7 @@ Full implementation plan: `docs/superpowers/plans/2026-03-31-kaam-mvp.md` — ph
 
 ## About
 
-Built by **Sadip Wagle** — Co-Founder of Datambit (London), AI Solutions Architect with production experience for the UK Home Office, Royal Navy, and Mastercard. Currently building indigenous AI products for Nepal.
+Built by **Sadip Wagle** — AI Solutions Architect, formerly Co-Founder of **Datambit (London, 2023–2025)** with production AI experience for the **UK Home Office, Royal Navy, Mastercard,** and **Nationwide**. Currently based in Kathmandu, building indigenous AI products for Nepal.
 
 - **LinkedIn:** [sadip-wagle](https://www.linkedin.com/in/sadip-wagle-711245b7/)
 - **GitHub:** [@wsadip-tech-ai](https://github.com/wsadip-tech-ai)
