@@ -1,6 +1,7 @@
 package com.kaam.app.data.repository
 
 import com.kaam.app.data.model.Profile
+import com.kaam.app.data.model.UserRole
 import com.kaam.app.data.model.WorkerProfile
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.query.Columns
@@ -44,6 +45,14 @@ class ProfileRepository @Inject constructor(
             .delete {
                 filter { eq("id", userId) }
             }
+    }
+
+    suspend fun getVerifiedWorkersByService(service: String): List<Profile> {
+        return postgrest.from("profiles")
+            .select {
+                filter { eq("role", "worker") }
+            }
+            .decodeList<Profile>()
     }
 
     // ---------- WorkerProfile ----------

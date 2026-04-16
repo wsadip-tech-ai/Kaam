@@ -1,12 +1,8 @@
 package com.kaam.app.navigation
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -23,6 +19,42 @@ import com.kaam.app.ui.auth.OtpVerifyScreen
 import com.kaam.app.ui.auth.PhoneEntryScreen
 import com.kaam.app.ui.auth.RoleSelectScreen
 import com.kaam.app.ui.auth.WelcomeScreen
+import com.kaam.app.ui.chat.ChatListScreen
+import com.kaam.app.ui.chat.ChatListViewModel
+import com.kaam.app.ui.chat.ChatRoomScreen
+import com.kaam.app.ui.chat.ChatRoomViewModel
+import com.kaam.app.ui.customer.BookingFormScreen
+import com.kaam.app.ui.customer.BookingFormViewModel
+import com.kaam.app.ui.customer.HomeScreen
+import com.kaam.app.ui.customer.HomeViewModel
+import com.kaam.app.ui.customer.JobApplicantsScreen
+import com.kaam.app.ui.customer.JobApplicantsViewModel
+import com.kaam.app.ui.customer.LeaveReviewScreen
+import com.kaam.app.ui.customer.LeaveReviewViewModel
+import com.kaam.app.ui.customer.MyBookingsScreen
+import com.kaam.app.ui.customer.MyBookingsViewModel
+import com.kaam.app.ui.customer.PaymentScreen
+import com.kaam.app.ui.customer.PaymentViewModel
+import com.kaam.app.ui.customer.PostJobScreen
+import com.kaam.app.ui.customer.PostJobViewModel
+import com.kaam.app.ui.customer.WorkerListScreen
+import com.kaam.app.ui.customer.WorkerListViewModel
+import com.kaam.app.ui.customer.WorkerProfileScreen
+import com.kaam.app.ui.customer.WorkerProfileViewModel
+import com.kaam.app.ui.profile.SettingsScreen
+import com.kaam.app.ui.profile.SettingsViewModel
+import com.kaam.app.ui.worker.BookingDetailScreen
+import com.kaam.app.ui.worker.BookingDetailViewModel
+import com.kaam.app.ui.worker.DashboardScreen
+import com.kaam.app.ui.worker.DashboardViewModel
+import com.kaam.app.ui.worker.JobBoardScreen
+import com.kaam.app.ui.worker.JobBoardViewModel
+import com.kaam.app.ui.worker.MyReviewsScreen
+import com.kaam.app.ui.worker.MyReviewsViewModel
+import com.kaam.app.ui.worker.ProfileSetupScreen
+import com.kaam.app.ui.worker.ProfileSetupViewModel
+import com.kaam.app.ui.worker.VerificationStatusScreen
+import com.kaam.app.ui.worker.VerificationStatusViewModel
 
 @Composable
 fun KaamNavHost(
@@ -30,7 +62,6 @@ fun KaamNavHost(
     startDestination: String,
     modifier: Modifier = Modifier,
 ) {
-    // Hoist the AuthViewModel at NavHost level so auth state persists across auth screens
     val authViewModel: AuthViewModel = hiltViewModel()
     val uiState by authViewModel.uiState.collectAsStateWithLifecycle()
 
@@ -50,21 +81,12 @@ fun KaamNavHost(
         }
 
         composable(Screen.PhoneEntry.route) {
-            // Navigate forward once OTP has been sent
-            LaunchedEffect(uiState.otpSent) {
-                if (uiState.otpSent) {
-                    // phone is carried through the nav argument — we read it back from the VM
-                    // (stored in the transient otpPhone field below)
-                }
-            }
-
             PhoneEntryScreen(
                 isLoading = uiState.isLoading,
                 error = uiState.error,
                 onSendOtp = { phone ->
                     authViewModel.clearError()
                     authViewModel.sendOtp(phone)
-                    // Navigate immediately; OTP screen shows loading via shared state
                     navController.navigate(Screen.OtpVerify.createRoute(phone))
                 },
             )
@@ -76,11 +98,9 @@ fun KaamNavHost(
         ) { backStackEntry ->
             val phone = backStackEntry.arguments?.getString("phone") ?: ""
 
-            // Navigate forward once authenticated
             LaunchedEffect(uiState.isAuthenticated) {
                 if (uiState.isAuthenticated) {
                     if (uiState.hasProfile) {
-                        // Existing profile — go straight to the appropriate home
                         val destination = when (uiState.userRole) {
                             UserRole.CUSTOMER -> Screen.CustomerHome.route
                             UserRole.WORKER -> Screen.WorkerDashboard.route
@@ -118,7 +138,6 @@ fun KaamNavHost(
         }
 
         composable(Screen.BasicInfo.route) {
-            // After profile is created navigate to the correct home
             LaunchedEffect(uiState.hasProfile) {
                 if (uiState.hasProfile) {
                     val destination = when (uiState.userRole) {
@@ -132,8 +151,6 @@ fun KaamNavHost(
                 }
             }
 
-            // currentUserId is needed to build the Profile object; the repository
-            // will fill it server-side, so we use an empty placeholder here.
             BasicInfoScreen(
                 isLoading = uiState.isLoading,
                 error = uiState.error,
@@ -141,9 +158,9 @@ fun KaamNavHost(
                     val role = uiState.userRole ?: UserRole.CUSTOMER
                     authViewModel.createProfile(
                         Profile(
-                            id = "",        // server assigns via auth.uid()
+                            id = "",
                             fullName = name,
-                            phone = "",     // server reads from auth session
+                            phone = "",
                             role = role,
                             city = city,
                             area = area,
@@ -156,50 +173,215 @@ fun KaamNavHost(
         // ── Customer ──────────────────────────────────────────────────────────
 
         composable(Screen.CustomerHome.route) {
-            PlaceholderScreen("Customer Home")
+            val viewModel: HomeViewModel = hiltViewModel()
+            HomeScreen(
+                viewModel = viewModel,
+                onServiceClick = { service ->
+                    navController.navigate(Screen.WorkerList.createRoute(service))
+                },
+                onPostJob = {
+                    navController.navigate(Screen.PostJob.route)
+                },
+                onBookingClick = { bookingId ->
+                    navController.navigate(Screen.Payment.createRoute(bookingId))
+                },
+            )
         }
+
+        composable(
+            route = Screen.WorkerList.route,
+            arguments = listOf(navArgument("service") { type = NavType.StringType }),
+        ) {
+            val viewModel: WorkerListViewModel = hiltViewModel()
+            WorkerListScreen(
+                viewModel = viewModel,
+                onWorkerClick = { workerId ->
+                    navController.navigate(Screen.WorkerProfile.createRoute(workerId))
+                },
+            )
+        }
+
+        composable(
+            route = Screen.WorkerProfile.route,
+            arguments = listOf(navArgument("workerId") { type = NavType.StringType }),
+        ) {
+            val viewModel: WorkerProfileViewModel = hiltViewModel()
+            WorkerProfileScreen(
+                viewModel = viewModel,
+                onBookNow = { workerId ->
+                    navController.navigate(Screen.BookingForm.createRoute(workerId))
+                },
+                onSendInquiry = { workerId ->
+                    // Navigate to chat — conversation will be created on first message
+                    navController.navigate(Screen.ChatList.route)
+                },
+            )
+        }
+
+        composable(
+            route = Screen.BookingForm.route,
+            arguments = listOf(navArgument("workerId") { type = NavType.StringType }),
+        ) {
+            val viewModel: BookingFormViewModel = hiltViewModel()
+            BookingFormScreen(
+                viewModel = viewModel,
+                onComplete = {
+                    navController.navigate(Screen.MyBookings.route) {
+                        popUpTo(Screen.CustomerHome.route)
+                    }
+                },
+            )
+        }
+
         composable(Screen.MyBookings.route) {
-            PlaceholderScreen("My Bookings")
+            val viewModel: MyBookingsViewModel = hiltViewModel()
+            MyBookingsScreen(
+                viewModel = viewModel,
+                onBookingClick = { bookingId ->
+                    navController.navigate(Screen.Payment.createRoute(bookingId))
+                },
+            )
         }
+
         composable(Screen.PostJob.route) {
-            PlaceholderScreen("Post Job")
+            val viewModel: PostJobViewModel = hiltViewModel()
+            PostJobScreen(
+                viewModel = viewModel,
+                onComplete = {
+                    navController.popBackStack()
+                },
+            )
+        }
+
+        composable(
+            route = Screen.JobApplicants.route,
+            arguments = listOf(navArgument("jobRequestId") { type = NavType.StringType }),
+        ) {
+            val viewModel: JobApplicantsViewModel = hiltViewModel()
+            JobApplicantsScreen(viewModel = viewModel)
+        }
+
+        composable(
+            route = Screen.Payment.route,
+            arguments = listOf(navArgument("bookingId") { type = NavType.StringType }),
+        ) { backStackEntry ->
+            val bookingId = backStackEntry.arguments?.getString("bookingId") ?: ""
+            val viewModel: PaymentViewModel = hiltViewModel()
+            PaymentScreen(
+                viewModel = viewModel,
+                onPaid = {
+                    navController.navigate(Screen.LeaveReview.createRoute(bookingId)) {
+                        popUpTo(Screen.MyBookings.route)
+                    }
+                },
+            )
+        }
+
+        composable(
+            route = Screen.LeaveReview.route,
+            arguments = listOf(navArgument("bookingId") { type = NavType.StringType }),
+        ) {
+            val viewModel: LeaveReviewViewModel = hiltViewModel()
+            LeaveReviewScreen(
+                viewModel = viewModel,
+                onComplete = {
+                    navController.navigate(Screen.CustomerHome.route) {
+                        popUpTo(Screen.CustomerHome.route) { inclusive = true }
+                    }
+                },
+            )
         }
 
         // ── Worker ────────────────────────────────────────────────────────────
 
-        composable(Screen.WorkerDashboard.route) {
-            PlaceholderScreen("Worker Dashboard")
-        }
-        composable(Screen.JobBoard.route) {
-            PlaceholderScreen("Job Board")
-        }
         composable(Screen.ProfileSetup.route) {
-            PlaceholderScreen("Profile Setup")
+            val viewModel: ProfileSetupViewModel = hiltViewModel()
+            ProfileSetupScreen(
+                viewModel = viewModel,
+                onComplete = {
+                    navController.navigate(Screen.VerificationStatus.route) {
+                        popUpTo(Screen.ProfileSetup.route) { inclusive = true }
+                    }
+                },
+            )
         }
+
         composable(Screen.VerificationStatus.route) {
-            PlaceholderScreen("Verification Status")
+            val viewModel: VerificationStatusViewModel = hiltViewModel()
+            VerificationStatusScreen(
+                viewModel = viewModel,
+                onVerified = {
+                    navController.navigate(Screen.WorkerDashboard.route) {
+                        popUpTo(Screen.VerificationStatus.route) { inclusive = true }
+                    }
+                },
+                onReUpload = {
+                    navController.navigate(Screen.ProfileSetup.route)
+                },
+            )
+        }
+
+        composable(Screen.WorkerDashboard.route) {
+            val viewModel: DashboardViewModel = hiltViewModel()
+            DashboardScreen(
+                viewModel = viewModel,
+                onBookingClick = { bookingId ->
+                    navController.navigate(Screen.BookingDetail.createRoute(bookingId))
+                },
+            )
+        }
+
+        composable(Screen.JobBoard.route) {
+            val viewModel: JobBoardViewModel = hiltViewModel()
+            JobBoardScreen(viewModel = viewModel)
+        }
+
+        composable(
+            route = Screen.BookingDetail.route,
+            arguments = listOf(navArgument("bookingId") { type = NavType.StringType }),
+        ) {
+            val viewModel: BookingDetailViewModel = hiltViewModel()
+            BookingDetailScreen(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() },
+            )
+        }
+
+        composable(Screen.MyReviews.route) {
+            val viewModel: MyReviewsViewModel = hiltViewModel()
+            MyReviewsScreen(viewModel = viewModel)
         }
 
         // ── Shared ────────────────────────────────────────────────────────────
 
         composable(Screen.ChatList.route) {
-            PlaceholderScreen("Chat List")
+            val viewModel: ChatListViewModel = hiltViewModel()
+            ChatListScreen(
+                viewModel = viewModel,
+                onConversationClick = { conversationId ->
+                    navController.navigate(Screen.ChatRoom.createRoute(conversationId))
+                },
+            )
         }
-        composable(Screen.Settings.route) {
-            PlaceholderScreen("Settings")
-        }
-        composable(Screen.Notifications.route) {
-            PlaceholderScreen("Notifications")
-        }
-    }
-}
 
-@Composable
-private fun PlaceholderScreen(name: String) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(text = name)
+        composable(
+            route = Screen.ChatRoom.route,
+            arguments = listOf(navArgument("conversationId") { type = NavType.StringType }),
+        ) {
+            val viewModel: ChatRoomViewModel = hiltViewModel()
+            ChatRoomScreen(viewModel = viewModel)
+        }
+
+        composable(Screen.Settings.route) {
+            val viewModel: SettingsViewModel = hiltViewModel()
+            SettingsScreen(
+                viewModel = viewModel,
+                onLoggedOut = {
+                    navController.navigate(Screen.Welcome.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+            )
+        }
     }
 }

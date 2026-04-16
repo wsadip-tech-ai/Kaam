@@ -38,6 +38,9 @@ sealed class Screen(val route: String) {
     data object Payment : Screen("payment/{bookingId}") {
         fun createRoute(bookingId: String) = "payment/$bookingId"
     }
+    data object LeaveReview : Screen("leave_review/{bookingId}") {
+        fun createRoute(bookingId: String) = "leave_review/$bookingId"
+    }
 
     // Worker
     data object ProfileSetup : Screen("profile_setup")
