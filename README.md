@@ -132,8 +132,8 @@ Built by **Sadip Wagle** — AI Solutions Architect, formerly Co-Founder of **Da
 
 - **LinkedIn:** [sadip-wagle](https://www.linkedin.com/in/sadip-wagle-711245b7/)
 - **GitHub:** [@wsadip-tech-ai](https://github.com/wsadip-tech-ai)
-- **Email:** wsadip@gmail.com
+- **Email:** waglesadip79@gmail.com
 
 ---
 
-*Kaam is part of a portfolio of Nepal-first initiatives, alongside [KaraDarpan](https://github.com/wsadip-tech-ai/KaraDarpan) (tax AI), [Astra](https://github.com/wsadip-tech-ai/Astra) (astrology AI), [WedMe](https://github.com/wsadip-tech-ai/WedMe) (event direct-booking), and [PartyPour](https://github.com/wsadip-tech-ai/PartyPour) (event beverage planning).*
+*Kaam is part of a portfolio of Nepal-first initiatives, alongside [Astra](https://github.com/wsadip-tech-ai/Astra) (astrology AI), [Pasal AI](https://github.com/wsadip-tech-ai/pasal-ai) (Nepali DM-commerce AI), [WedMe](https://github.com/wsadip-tech-ai/WedMe) (event direct-booking), and [PartyPour](https://github.com/wsadip-tech-ai/PartyPour) (event beverage planning).*
