@@ -101,6 +101,17 @@ See `docs/superpowers/specs/2026-03-31-kaam-app-design.md` for the full design s
 **Notifications:** Firebase Cloud Messaging
 **Architecture:** MVVM with single-activity Compose + Hilt DI
 
+## Repo tour
+
+```
+app/src/main/java/com/kaam/app/
+  ui/            # Jetpack Compose screens + components (Material 3)
+  data/          # repositories, Supabase data sources, models
+  navigation/    # single-activity Compose navigation graph
+  di/            # Hilt modules
+supabase/        # migrations (Postgres + RLS) + storage
+```
+
 ## Local development
 
 ```bash
